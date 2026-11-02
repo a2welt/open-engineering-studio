@@ -1,51 +1,17 @@
 import { useId, useState, type FormEvent } from 'react';
 
-import type { ImpactReport, Layer } from '../api/xray/types';
+import type { ImpactReport } from '../api/xray/types';
 import { recallFor } from '../api/recall';
+import { ArchitectureMap } from '../components/ArchitectureMap';
 import { Sage, Scout } from '../components/crew';
 import { SparkIcon } from '../components/icons';
 import { type Route, type XrayState, repoName } from '../state';
+import { useReducedMotion } from '../theme';
 
 const ARCHITECTURE_LAYERS = ['presentation', 'core', 'adapters', 'composition'];
-const FLOW_NOTES: Record<string, string> = {
-  presentation: 'calls application services',
-  core: 'adapters implement ports; the core never imports adapters',
-};
 
 function plural(count: number, word: string): string {
   return `${count} ${word}${count === 1 ? '' : 's'}`;
-}
-
-function LayerBlock({ layer, impact }: { layer: Layer; impact: ImpactReport | null }) {
-  const changed = new Set(impact ? [impact.target.component] : []);
-  const affected = new Map((impact?.summary.components ?? []).map((c) => [c.id, c.files]));
-  return (
-    <>
-      <h3 className="layer-title" id={`layer-${layer.name}`}>
-        {layer.label}
-      </h3>
-      <ul className="components" aria-labelledby={`layer-${layer.name}`}>
-        {layer.components.map((component) => {
-          const isChanged = changed.has(component.id);
-          const affectedFiles = affected.get(component.id);
-          const state = isChanged ? 'changed' : affectedFiles ? 'affected' : '';
-          const targetFile = impact?.target.path?.split('/').pop();
-          return (
-            <li key={component.id} className={`component ${state}`} title={component.id}>
-              <div className="title">{component.name.split('/').pop()}</div>
-              <div className="meta">
-                {isChanged && targetFile
-                  ? `${targetFile} · changed`
-                  : affectedFiles
-                    ? `${plural(affectedFiles, 'file')} affected`
-                    : plural(component.files, 'file')}
-              </div>
-            </li>
-          );
-        })}
-      </ul>
-    </>
-  );
 }
 
 function ImpactAnswer({ impact }: { impact: ImpactReport }) {
@@ -103,6 +69,7 @@ export function Understand({ xray, onNavigate }: UnderstandProps) {
   const [question, setQuestion] = useState('');
   const [depth, setDepth] = useState('');
   const inputId = useId();
+  const reducedMotion = useReducedMotion();
   const listId = useId();
   const repo = repoName(layers?.root);
   const shown = layers?.layers.filter((l) => ARCHITECTURE_LAYERS.includes(l.name)) ?? [];
@@ -124,7 +91,10 @@ export function Understand({ xray, onNavigate }: UnderstandProps) {
       <section className="page-head rise" aria-labelledby="understand-title">
         <div>
           <div className="eyebrow">Step 2 · Impact</div>
-          <h2 id="understand-title">Understand {repo}</h2>
+          <h2 id="understand-title">
+            Understand {repo}
+            {layers?.repository?.commit && <span className="mono subtle"> · {layers.repository.commit.slice(0, 7)}</span>}
+          </h2>
           <p className="muted">
             {layers
               ? `${plural(shown.length, 'layer')}, ${plural(
@@ -159,17 +129,7 @@ export function Understand({ xray, onNavigate }: UnderstandProps) {
               <span className="chip affected">Affected</span>
             </span>
           </div>
-          {shown.map((layer, index) => (
-            <div key={layer.name}>
-              <LayerBlock layer={layer} impact={impact} />
-              {index < shown.length - 1 && FLOW_NOTES[layer.name] && (
-                <div className="flow-note" style={{ marginTop: 10 }}>
-                  <span className="flow-line" aria-hidden="true" />
-                  {FLOW_NOTES[layer.name]}
-                </div>
-              )}
-            </div>
-          ))}
+          {layers && <ArchitectureMap report={layers} layers={shown} impact={impact} reducedMotion={reducedMotion} />}
           {extra.length > 0 && (
             <p className="subtle" style={{ margin: 0 }}>
               Also analysed: {extra.map((l) => `${plural(l.files, 'file')} in ${l.label.toLowerCase()}`).join(', ')}.

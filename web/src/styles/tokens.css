@@ -64,6 +64,11 @@
   --red-rim: rgba(220, 38, 38, 0.7);
   --bar: linear-gradient(90deg, #7c3aed, #c026d3);
   --track: rgba(20, 17, 31, 0.08);
+  --impact: #d97706;
+  --impact-glow: rgba(217, 119, 6, 0.35);
+  --lane: rgba(255, 255, 255, 0.28);
+  --lane-label: rgba(255, 255, 255, 0.22);
+  --node: rgba(255, 255, 255, 0.55);
 }
 
 :root[data-theme='dark'] {
@@ -120,4 +125,9 @@
   --red-rim: rgba(252, 165, 165, 0.9);
   --bar: linear-gradient(90deg, #c084fc, #f0abfc);
   --track: rgba(255, 255, 255, 0.1);
+  --impact: #fbbf24;
+  --impact-glow: rgba(251, 191, 36, 0.45);
+  --lane: rgba(255, 255, 255, 0.035);
+  --lane-label: rgba(255, 255, 255, 0.03);
+  --node: rgba(22, 20, 40, 0.55);
 }
