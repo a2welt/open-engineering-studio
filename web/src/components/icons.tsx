@@ -105,3 +105,9 @@ export const ChevronIcon = (p: IconProps) => (
     <path d="M6 9l6 6 6-6" />
   </Icon>
 );
+
+export const ArrowUpIcon = (p: IconProps) => (
+  <Icon strokeWidth={2.5} {...p}>
+    <path d="M12 19V5M5 12l7-7 7 7" />
+  </Icon>
+);

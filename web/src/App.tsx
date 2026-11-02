@@ -1,6 +1,16 @@
 import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from 'react';
 
-import { BrainIcon, BranchIcon, GaugeIcon, LayersIcon, MoonIcon, ShieldIcon, SparkIcon, SunIcon } from './components/icons';
+import {
+  ArrowUpIcon,
+  BrainIcon,
+  BranchIcon,
+  GaugeIcon,
+  LayersIcon,
+  MoonIcon,
+  ShieldIcon,
+  SparkIcon,
+  SunIcon,
+} from './components/icons';
 import { Remember } from './screens/Remember';
 import { Trust } from './screens/Trust';
 import { Understand } from './screens/Understand';
@@ -14,6 +24,29 @@ const NAV: { route: Route; label: string; icon: ReactNode }[] = [
   { route: 'remember', label: 'Remember', icon: <BrainIcon /> },
   { route: 'optimize', label: 'Optimize', icon: <GaugeIcon /> },
 ];
+
+/** The glass shield from the design: a gradient fill under a light rim. */
+function BrandMark() {
+  return (
+    <svg width="34" height="34" viewBox="0 0 48 48" aria-hidden="true">
+      <defs>
+        <linearGradient id="brand-fill" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#C4B5FD" />
+          <stop offset="0.5" stopColor="#F0ABFC" />
+          <stop offset="1" stopColor="#FDBA74" />
+        </linearGradient>
+        <linearGradient id="brand-rim" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#FFFFFF" stopOpacity="0.9" />
+          <stop offset="0.5" stopColor="#FFFFFF" stopOpacity="0.1" />
+          <stop offset="1" stopColor="#FFFFFF" stopOpacity="0.6" />
+        </linearGradient>
+      </defs>
+      <path d="M24 4l16 6.5v11c0 10-7 17-16 21-9-4-16-11-16-21v-11z" fill="url(#brand-fill)" opacity="0.85" />
+      <path d="M24 4l16 6.5v11c0 10-7 17-16 21-9-4-16-11-16-21v-11z" fill="none" stroke="url(#brand-rim)" strokeWidth="1.5" />
+      <path d="M16.5 24l5 5 10-10" fill="none" stroke="#FFFFFF" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
 
 const TITLES: Record<Route, string> = {
   understand: 'Understand',
@@ -59,13 +92,20 @@ export function App() {
 
   return (
     <div className="studio">
+      <div className="backdrop" aria-hidden="true">
+        <div className="blob b1" />
+        <div className="blob b2" />
+        <div className="blob b3" />
+        <div className="blob b4" />
+        <div className="blob b5" />
+      </div>
       <a className="skip-link" href="#main">
         Skip to content
       </a>
       <header className="topbar">
         <div className="brand">
           <span className="brand-mark">
-            <ShieldIcon size={20} />
+            <BrandMark />
           </span>
           Engineering Studio
         </div>
@@ -81,6 +121,9 @@ export function App() {
             placeholder={`What breaks if I change… e.g. ${DEFAULT_QUESTION.split('/').slice(-2).join('/')}`}
             autoComplete="off"
           />
+          <button type="submit" className="ask-go" aria-label="Ask the crew">
+            <ArrowUpIcon size={16} />
+          </button>
         </form>
         <div className="topbar-end">
           {xray.layers && (

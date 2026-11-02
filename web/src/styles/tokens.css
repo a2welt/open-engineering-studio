@@ -1,89 +1,123 @@
-/* Design tokens from the Studio design reference. Light is the default; dark applies when the
-   user picks it, or follows the system when no choice is stored. Text pairs meet WCAG AA
-   (checked in src/test/contrast.test.ts). */
+/* Design tokens from the Studio glass design (Claude Design canvas "Open Engineering Studio").
+   Panels are frosted glass over drifting colour blobs. Dark is the canvas default; light
+   applies when the user picks it, or follows the system when no choice is stored.
+   src/test/contrast.test.ts checks every text pair for WCAG AA, including text on glass over
+   the brightest blob. */
 
 :root {
   color-scheme: light;
-  --bg: #f8fafd;
+  /* backdrop */
+  --base: #eef0ff;
+  --b1: #a78bfa;
+  --b2: #f0abfc;
+  --b3: #fdba74;
+  --b4: #5eead4;
+  --b5: #93c5fd;
+  --blob: 0.9;
+  /* glass */
+  --tint: rgba(255, 255, 255, 0.42);
+  --tint-strong: rgba(255, 255, 255, 0.55);
+  --tile: rgba(255, 255, 255, 0.5);
+  --tile-border: rgba(255, 255, 255, 0.7);
+  --rim: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.95),
+    rgba(255, 255, 255, 0.35) 40%,
+    rgba(255, 255, 255, 0.2) 62%,
+    rgba(255, 255, 255, 0.9)
+  );
+  --shine: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  --depth: 0 24px 60px rgba(76, 29, 149, 0.16);
+  --amber-glass: rgba(255, 237, 204, 0.6);
+  --amber-rim: linear-gradient(135deg, rgba(217, 119, 6, 0.7), rgba(251, 191, 36, 0.2) 45%, rgba(217, 119, 6, 0.55));
+  /* opaque fallback when transparency is reduced or unsupported */
   --surface: #ffffff;
-  --surface2: #f0f4f9;
-  --search: #e9eef6;
-  --text: #1f1f1f;
-  --text2: #444746;
-  --text3: #5f6368;
-  --outline: #747775;
-  --divider: #e3e3e3;
-  --primary: #0b57d0;
-  --on-primary: #ffffff;
-  --pc: #d3e3fd;
-  --on-pc: #041e49;
-  --green: #146c2e;
-  --on-green: #ffffff;
-  --gc: #c4eed0;
-  --on-gc: #072711;
-  --amber-c: #ffe7a3;
-  --on-amber: #3e2700;
-  --amber-text: #5c4300;
-  --amber-soft: #fff0c2;
-  --red: #b3261e;
-  --red-c: #f9dedc;
-  --on-red: #410e0b;
-  --chg: #ffdad3;
-  --on-chg: #5f1408;
-  --chg-border: #c5221f;
-  --purple-c: #eaddff;
-  --on-purple: #21005d;
-  --purple-text: #4a2a7f;
-  --purple-soft: #f3edf7;
-  --hero1: #e8f0fe;
-  --hero2: #f3e8fd;
-  --hero3: #e6f4ea;
-  --crew: rgba(255, 255, 255, 0.75);
-  --shadow: 0 1px 2px rgba(60, 64, 67, 0.12), 0 1px 3px 1px rgba(60, 64, 67, 0.08);
-  --badge: #b3261e;
+  /* text */
+  --text: #14111f;
+  --text2: #34304a;
+  --text3: #4a4560;
+  --divider: rgba(20, 17, 31, 0.1);
+  --outline: rgba(20, 17, 31, 0.28);
+  /* actions */
+  --btn: #14111f;
+  --on-btn: #ffffff;
+  --accent: #5b21b6;
+  --approve: #047857;
+  --on-approve: #ffffff;
+  --reject: #991b1b;
+  --focus: #6d28d9;
+  --badge: #e11d48;
   --on-badge: #ffffff;
-  --focus: #0b57d0;
+  /* tinted chips and states */
+  --blue-c: rgba(37, 99, 235, 0.14);
+  --on-blue: #1e3a8a;
+  --purple-c: rgba(124, 58, 237, 0.14);
+  --on-purple: #4c1d95;
+  --purple-text: #5b21b6;
+  --green-c: rgba(5, 150, 105, 0.14);
+  --on-green: #064e3b;
+  --amber-c: rgba(217, 119, 6, 0.16);
+  --amber-line: rgba(217, 119, 6, 0.45);
+  --on-amber: #78350f;
+  --red-c: rgba(220, 38, 38, 0.14);
+  --on-red: #7f1d1d;
+  --red-rim: rgba(220, 38, 38, 0.7);
+  --bar: linear-gradient(90deg, #7c3aed, #c026d3);
+  --track: rgba(20, 17, 31, 0.08);
 }
 
 :root[data-theme='dark'] {
   color-scheme: dark;
-  --bg: #131314;
-  --surface: #1e1f20;
-  --surface2: #282a2c;
-  --search: #282a2c;
-  --text: #e3e3e3;
-  --text2: #c4c7c5;
-  --text3: #abafb3;
-  --outline: #8e918f;
-  --divider: #3c4043;
-  --primary: #a8c7fa;
-  --on-primary: #062e6f;
-  --pc: #0842a0;
-  --on-pc: #d3e3fd;
-  --green: #6dd58c;
-  --on-green: #0a3818;
-  --gc: #0f5223;
-  --on-gc: #c4eed0;
-  --amber-c: #5c4300;
-  --on-amber: #ffdf99;
-  --amber-text: #ffd970;
-  --amber-soft: #3d2e00;
-  --red: #f2b8b5;
-  --red-c: #8c1d18;
-  --on-red: #f9dedc;
-  --chg: #601410;
-  --on-chg: #ffdad3;
-  --chg-border: #f28b82;
-  --purple-c: #4f378b;
-  --on-purple: #eaddff;
-  --purple-text: #d0bcff;
-  --purple-soft: #2b2433;
-  --hero1: #1b2a45;
-  --hero2: #2b1f3d;
-  --hero3: #16301f;
-  --crew: rgba(30, 31, 32, 0.72);
-  --shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
-  --badge: #f2b8b5;
-  --on-badge: #601410;
-  --focus: #a8c7fa;
+  --base: #0a0a12;
+  --b1: #7c3aed;
+  --b2: #db2777;
+  --b3: #f97316;
+  --b4: #14b8a6;
+  --b5: #2563eb;
+  --blob: 0.85;
+  --tint: rgba(16, 14, 32, 0.46);
+  --tint-strong: rgba(16, 14, 32, 0.56);
+  --tile: rgba(255, 255, 255, 0.07);
+  --tile-border: rgba(255, 255, 255, 0.12);
+  --rim: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.65),
+    rgba(255, 255, 255, 0.08) 38%,
+    rgba(255, 255, 255, 0.04) 62%,
+    rgba(255, 255, 255, 0.4)
+  );
+  --shine: inset 0 1px 0 rgba(255, 255, 255, 0.35), inset 0 -1px 0 rgba(255, 255, 255, 0.05);
+  --depth: 0 24px 60px rgba(0, 0, 0, 0.45);
+  --amber-glass: rgba(74, 42, 0, 0.6);
+  --amber-rim: linear-gradient(135deg, rgba(253, 224, 71, 0.9), rgba(251, 191, 36, 0.15) 45%, rgba(253, 186, 116, 0.7));
+  --surface: #1e1b2e;
+  --text: #ffffff;
+  --text2: rgba(255, 255, 255, 0.86);
+  --text3: rgba(255, 255, 255, 0.8);
+  --divider: rgba(255, 255, 255, 0.12);
+  --outline: rgba(255, 255, 255, 0.3);
+  --btn: #ffffff;
+  --on-btn: #14111f;
+  --accent: #ede4ff;
+  --approve: #34d399;
+  --on-approve: #052e1f;
+  --reject: #fecaca;
+  --focus: #c4b5fd;
+  --badge: #e11d48;
+  --on-badge: #ffffff;
+  --blue-c: rgba(96, 165, 250, 0.24);
+  --on-blue: #dbeafe;
+  --purple-c: rgba(192, 132, 252, 0.26);
+  --on-purple: #f3e8ff;
+  --purple-text: #e9d5ff;
+  --green-c: rgba(52, 211, 153, 0.24);
+  --on-green: #d1fae5;
+  --amber-c: rgba(251, 191, 36, 0.26);
+  --amber-line: rgba(251, 191, 36, 0.45);
+  --on-amber: #fef3c7;
+  --red-c: rgba(248, 113, 113, 0.3);
+  --on-red: #fee2e2;
+  --red-rim: rgba(252, 165, 165, 0.9);
+  --bar: linear-gradient(90deg, #c084fc, #f0abfc);
+  --track: rgba(255, 255, 255, 0.1);
 }

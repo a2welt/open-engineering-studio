@@ -72,7 +72,8 @@ The agent reads files and runs tests (allowed), tries to edit CI (denied) and as
 reports the outcome, and the signed receipt shows up and verifies. Use `--port` if 8787 is
 taken (and match `OAT_TARGET`).
 
-The design follows the Studio design reference: light and dark themes (stored choice, else the
+The design follows the Studio glass design on the Claude Design canvas: frosted glass panels over
+drifting colour blobs, light and dark themes (stored choice, else the
 system setting) with WCAG AA contrast checked in tests, keyboard and screen-reader friendly
 controls, a bottom navigation bar on phones, and no animation when the system asks for reduced
 motion.
