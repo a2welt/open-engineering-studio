@@ -18,7 +18,7 @@ Tools link to each other with the shared reference URIs defined in OpenAgentTrus
 ```
 xray/   Repo X-Ray: Python package, CLI and HTTP endpoint (standard library only)
 web/    Studio shell: React + Vite + TypeScript
-docs/   Integration contracts
+docs/   Integration contracts and decisions (docs/adr)
 ```
 
 ## Run Repo X-Ray
