@@ -1,71 +1,44 @@
-# OpenAgentTrust HTTP API the Studio expects (draft)
+# How the Studio uses the OpenAgentTrust API
 
-**Status:** draft. `oat serve` is being built in parallel in the
-[open-agent-trust](https://github.com/findajay/open-agent-trust) repository. The Trust screen
-talks to it through a typed client (`web/src/api/oat/`) with a mock, so this contract can move:
-every path below is configurable with `VITE_OAT_PATHS`, and the client tolerates either a bare
-JSON array or an envelope object for list endpoints.
+The Trust screen talks to `oat serve`, the HTTP API of the
+[OpenAgentTrust](https://github.com/findajay/open-agent-trust) gateway. The API itself is
+documented in that repository's `docs/gateway-api.md`; this page only says which parts the
+Studio uses and how. The client is `web/src/api/oat/http.ts`; `web/src/api/oat/mock.ts` stands
+in when `VITE_OAT_MODE` is not `http`.
 
-Bodies are JSON with snake_case members. Errors are any non-2xx status with
-`{"error": "<message>"}` (or `{"detail": ...}`).
+| Studio needs | Endpoint (default path, `VITE_OAT_PATHS` key) |
+|---|---|
+| Approval cards | `GET /v1/approvals` (`pendingApprovals`) |
+| Approve / Reject | `POST /v1/approvals/{id}` with `{decision: "approved" \| "rejected", reason?}` (`decide`) |
+| Activity log | `GET /v1/receipts?limit=50` (`receipts`) plus `GET /v1/actions` (`actions`) for actions that have no receipt yet |
+| Receipt panel | `GET /v1/receipts/{digest}` (`receipt`) and `POST /v1/verify` (`verify`) |
+| Export ledger | `GET /v1/ledger` (`ledger`), JSON Lines |
 
-| Key in `VITE_OAT_PATHS` | Default path | Method | Purpose |
-|---|---|---|---|
-| `pendingApprovals` | `/v1/approvals?status=pending` | GET | Requests whose policy decision is `require_approval` and that nobody has decided yet |
-| `approve` | `/v1/approvals/{id}/approve` | POST | Approve, sign the approval with the configured approver key, let the gateway execute |
-| `reject` | `/v1/approvals/{id}/reject` | POST | Reject; the gateway records a `not_executed` receipt |
-| `activity` | `/v1/activity` | GET | Recent requests, newest first |
-| `receipt` | `/v1/receipts/{digest}` | GET | One receipt, looked up by its digest (`sha256:…`) |
-| `verify` | `/v1/verify` | POST | Run the checks of `oat proof verify` on a receipt |
-| `ledger` | `/v1/ledger` | GET | The receipt ledger as JSON Lines |
+## Statuses
 
-## Bodies
+The activity log reads each receipt's decision, approval and outcome:
 
-`GET pendingApprovals` → `{"approvals": [PendingApproval]}`
+| Receipt or action | Shown as |
+|---|---|
+| outcome `succeeded` | Allowed |
+| outcome `failed` (`ToolError`, `McpError`, …) | Failed |
+| outcome `failed` with `OutcomeNotReported`, or `require_approval` never decided | Expired |
+| `not_executed` with a rejected approval | Rejected |
+| `not_executed` otherwise | Denied |
+| action `pending_approval` (no receipt yet) | Needs approval |
+| action `allowed` (approved or allowed, the agent is running it) | Running |
 
-```json
-{
-  "id": "req-0914-routing",
-  "request_digest": "sha256:…",
-  "agent_name": "coding agent",
-  "action": "repo.edit",
-  "resource": "python/omf/core/services/routing.py",
-  "rule_id": "core-services-need-review",
-  "reason": "Changes to core services need a human review.",
-  "requested_at": "2026-11-02T09:14:00Z",
-  "references": ["git+https://github.com/findajay/Open-model-fabric@<commit>#python/omf/core/services/routing.py"],
-  "change": {"lines_added": 18, "lines_removed": 6, "tests_passed": true}
-}
-```
+## Approvals and the token
 
-`references` is `request.arguments.references` (see OpenAgentTrust's
-`docs/integration/shared-references.md`). `change` is optional context the gateway may have.
+`oat serve` signs approvals made through the API with its `--approver-key`, so the API token
+is what identifies the person approving. The Vite dev server's `/oat` proxy adds
+`Authorization: Bearer $OAT_API_TOKEN` to every request. `OAT_API_TOKEN` has no `VITE_`
+prefix, so Vite never puts it in the browser bundle. A production deployment needs the same
+arrangement: a server-side proxy that authenticates the user and adds the token.
 
-`POST approve` / `POST reject` with `{"reason": "…"}` (optional) →
-`{"status": "executed" | "rejected", "receipt_digest": "sha256:…" | null}`
+## Display fields
 
-`GET activity` → `{"entries": [ActivityEntry]}`
-
-```json
-{
-  "id": "req-0912-read",
-  "at": "2026-11-02T09:12:00Z",
-  "agent_name": "coding agent",
-  "action": "repo.read",
-  "resource": "core/services/**",
-  "effect": "allow | deny | require_approval | null",
-  "status": "executed | denied | rejected | pending | refused",
-  "receipt_digest": "sha256:… | null",
-  "verified": true,
-  "note": null
-}
-```
-
-`effect` is null and `status` is `refused` when the gateway refused the request before policy
-ran (outside the agent's delegated authority), so no receipt exists.
-
-`GET receipt` → `{"digest": "sha256:…", "receipt": <AgentProof v0.1 receipt>}` (a bare receipt
-document is accepted too).
-
-`POST verify` with `{"receipt": <AgentProof v0.1 receipt>}` → the `to_dict()` of
-`openagenttrust.verify.Report`: `{"ok": true, "checks": [{"name", "status", "detail"}]}`.
+`agent_name` comes from the delegation chain's last link, and `references` from
+`request.arguments.references` (see OpenAgentTrust's `docs/integration/shared-references.md`).
+An approval card shows `request.arguments.change` (`lines_added`, `lines_removed`,
+`tests_passed`) when the agent sent it.

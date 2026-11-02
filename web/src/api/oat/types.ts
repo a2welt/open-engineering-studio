@@ -1,19 +1,19 @@
 // Typed view of the OpenAgentTrust HTTP API (`oat serve`) that the Trust screen needs.
 //
-// `oat serve` is being built in parallel, so every endpoint path is configurable
-// (VITE_OAT_PATHS). Wire bodies are snake_case JSON as listed in docs/oat-api.md;
-// the HTTP client maps them to the camelCase types below.
+// Wire bodies are snake_case JSON as documented in open-agent-trust's
+// docs/gateway-api.md; the HTTP client maps them to the camelCase types below. Paths
+// can be overridden with VITE_OAT_PATHS for a gateway mounted elsewhere.
 
 export interface OatPaths {
-  /** GET: requests waiting for a human decision. */
+  /** GET: actions awaiting a human decision. */
   pendingApprovals: string;
-  /** POST {reason?}: approve, sign the approval and let the gateway execute. */
-  approve: string;
-  /** POST {reason?}: reject; the gateway records a not-executed receipt. */
-  reject: string;
-  /** GET: recent decisions, newest first. */
-  activity: string;
-  /** GET: one receipt by digest, as the AgentProof document. */
+  /** POST {decision, reason?}: approve or reject; the server signs with its approver key. */
+  decide: string;
+  /** GET: actions the server still holds (pending, running, recently finished). */
+  actions: string;
+  /** GET: receipts, newest first. */
+  receipts: string;
+  /** GET: one receipt by digest or reference. */
   receipt: string;
   /** POST {receipt}: run the independent verification checks. */
   verify: string;
@@ -22,10 +22,10 @@ export interface OatPaths {
 }
 
 export const DEFAULT_OAT_PATHS: OatPaths = {
-  pendingApprovals: '/v1/approvals?status=pending',
-  approve: '/v1/approvals/{id}/approve',
-  reject: '/v1/approvals/{id}/reject',
-  activity: '/v1/activity',
+  pendingApprovals: '/v1/approvals',
+  decide: '/v1/approvals/{id}',
+  actions: '/v1/actions',
+  receipts: '/v1/receipts?limit=50',
   receipt: '/v1/receipts/{digest}',
   verify: '/v1/verify',
   ledger: '/v1/ledger',
@@ -47,7 +47,15 @@ export interface PendingApproval {
   change: { linesAdded: number; linesRemoved: number; testsPassed: boolean | null } | null;
 }
 
-export type ActivityStatus = 'executed' | 'denied' | 'rejected' | 'pending' | 'refused';
+export type ActivityStatus =
+  | 'executed'
+  | 'running'
+  | 'failed'
+  | 'denied'
+  | 'rejected'
+  | 'pending'
+  | 'expired'
+  | 'refused';
 
 export interface ActivityEntry {
   id: string;
@@ -137,6 +145,10 @@ export const ACTION_LABELS: Record<string, string> = {
   'repo.edit': 'Edit',
   'tests.run': 'Run tests',
   'secrets.read': 'Read secret',
+  // Tool calls through `oat mcp-proxy --server repo` (scripts/oat_demo.py).
+  'mcp.repo.read_file': 'Read',
+  'mcp.repo.write_file': 'Edit',
+  'mcp.repo.run_tests': 'Run tests',
 };
 
 /** Display names for the checks `oat proof verify` runs (openagenttrust/verify.py). */

@@ -37,14 +37,18 @@ function download(name: string, text: string, type: string) {
 
 const STATUS: Record<ActivityEntry['status'], { label: string; tone: string }> = {
   executed: { label: 'Allowed', tone: 'green' },
+  running: { label: 'Running', tone: 'green' },
+  failed: { label: 'Failed', tone: 'red' },
   pending: { label: 'Needs approval', tone: 'amber' },
   denied: { label: 'Denied', tone: 'red' },
   rejected: { label: 'Rejected', tone: 'red' },
+  expired: { label: 'Expired', tone: 'outline' },
   refused: { label: 'Out of scope', tone: 'outline' },
 };
 
 function receiptLabel(entry: ActivityEntry): string {
   if (entry.status === 'pending') return 'Waiting for you';
+  if (entry.status === 'running') return 'Receipt when done';
   if (!entry.receiptDigest) return 'No receipt';
   if (entry.verified === false) return 'Failed verification';
   return entry.verified ? 'Verified' : 'Receipt';
@@ -361,8 +365,8 @@ export function Trust({ onPendingChange, affectedFilesFor, onNavigate }: TrustPr
       const result = approve ? await oat.approve(request.id, reason) : await oat.reject(request.id, reason);
       setAnnouncement(
         approve
-          ? `Approved and signed. The ${request.agentName} may ${request.action} ${request.resource}.`
-          : `Rejected. The ${request.agentName} will not ${request.action} ${request.resource}.`,
+          ? `Approved and signed. The ${request.agentName} may ${(ACTION_LABELS[request.action] ?? request.action).toLowerCase()} ${request.resource}.`
+          : `Rejected. The ${request.agentName} will not ${(ACTION_LABELS[request.action] ?? request.action).toLowerCase()} ${request.resource}.`,
       );
       await refresh();
       if (result.receiptDigest) select(result.receiptDigest);
