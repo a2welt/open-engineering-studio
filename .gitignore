@@ -19,3 +19,6 @@ node_modules/
 .env.*
 !.env.example
 .DS_Store
+
+# OpenAgentTrust demo keys and ledger (scripts/oat_demo.py)
+.oat-demo/

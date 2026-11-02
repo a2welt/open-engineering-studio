@@ -7,7 +7,7 @@ through their existing APIs instead of merging them:
 | Screen | Tool | Status |
 |---|---|---|
 | Understand | **Repo X-Ray** (this repository, `xray/`): import graph, layers, "what breaks if I change X" | v0, live |
-| Trust | **OpenAgentTrust**: agent approvals and verifiable AgentProof receipts | Mock client until `oat serve` lands; see [docs/oat-api.md](docs/oat-api.md) |
+| Trust | **OpenAgentTrust**: agent approvals and verifiable AgentProof receipts | Live with `oat serve`, mock otherwise; see [docs/oat-api.md](docs/oat-api.md) |
 | Remember | **Recall**: engineering decisions | Sample decisions; Recall API in Phase 2 |
 | Optimize | **BallastOS**: gateway token savings | Placeholder; live savings in Phase 2 |
 
@@ -55,6 +55,22 @@ OpenAgentTrust endpoint paths (`VITE_OAT_PATHS`).
 ```bash
 npm run lint && npm run typecheck && npm test && npm run build
 ```
+
+### Trust screen against a real gateway
+
+With [open-agent-trust](https://github.com/findajay/open-agent-trust) checked out next to this
+repository, start a seeded gateway that plays a coding agent working on Open-model-fabric:
+
+```bash
+uv run --project ../open-agent-trust python scripts/oat_demo.py   # oat serve on :8787
+cd web && npm run dev
+```
+
+The first run writes `web/.env.local` (`VITE_OAT_MODE=http`, `OAT_TARGET`, `OAT_API_TOKEN`).
+The agent reads files and runs tests (allowed), tries to edit CI (denied) and asks to edit
+`routing.py` (needs approval). Approve it on the Trust screen: the agent makes the edit,
+reports the outcome, and the signed receipt shows up and verifies. Use `--port` if 8787 is
+taken (and match `OAT_TARGET`).
 
 The design follows the Studio design reference: light and dark themes (stored choice, else the
 system setting) with WCAG AA contrast checked in tests, keyboard and screen-reader friendly
