@@ -21,6 +21,21 @@ web/    Studio shell: React + Vite + TypeScript
 docs/   Integration contracts and decisions (docs/adr)
 ```
 
+## Run everything
+
+One command starts Repo X-Ray, a seeded OpenAgentTrust gateway and the Studio, wired together:
+
+```bash
+python scripts/dev.py --repo ../Open-model-fabric
+```
+
+It prefixes each process's output (`[xray]`, `[oat]`, `[web]`), moves to the next free port
+when one is taken (and points the Studio's proxy at it), prints the Studio URL when all three
+are up, and stops all of them on Ctrl+C or when one exits. It needs uv and Node.js 24, runs
+`npm ci` on first use, and expects an
+[open-agent-trust](https://github.com/findajay/open-agent-trust) checkout next to this
+repository (`--oat PATH` to point elsewhere, `--no-oat` to use the Trust screen's mock).
+
 ## Run Repo X-Ray
 
 Needs Python 3.11+ and [uv](https://docs.astral.sh/uv/).
