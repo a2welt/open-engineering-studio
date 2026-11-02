@@ -3,12 +3,12 @@ import { useCallback, useEffect, useState } from 'react';
 import type { DataSource, ImpactReport, LayersReport, XrayClient } from './api/xray/types';
 import { useServices } from './services';
 
-export type Route = 'understand' | 'trust' | 'remember' | 'optimize';
-const ROUTES: Route[] = ['understand', 'trust', 'remember', 'optimize'];
+export type Route = 'lifecycle' | 'understand' | 'trust' | 'remember' | 'optimize';
+const ROUTES: Route[] = ['lifecycle', 'understand', 'trust', 'remember', 'optimize'];
 
 function parseHash(hash: string): Route {
   const name = hash.replace(/^#\/?/, '') as Route;
-  return ROUTES.includes(name) ? name : 'understand';
+  return ROUTES.includes(name) ? name : 'lifecycle';
 }
 
 export function useRoute(): [Route, (route: Route) => void] {

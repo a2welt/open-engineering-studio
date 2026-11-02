@@ -6,6 +6,7 @@ through their existing APIs instead of merging them:
 
 | Screen | Tool | Status |
 |---|---|---|
+| Lifecycle (home) | **All of them**: every change from intent to memory, changes in flight with their risk tier and evidence, what needs you | Live counts from X-Ray and OpenAgentTrust; sample change dossiers until `studio dossier build` output is served ([ADR 0001](docs/adr/0001-change-dossier-and-risk-tiered-review.md)) |
 | Understand | **Repo X-Ray** (this repository, `xray/`): import graph, layers, "what breaks if I change X" | v0, live |
 | Trust | **OpenAgentTrust**: agent approvals and verifiable AgentProof receipts | Live with `oat serve`, mock otherwise; see [docs/oat-api.md](docs/oat-api.md) |
 | Remember | **Recall**: engineering decisions | Sample decisions; Recall API in Phase 2 |

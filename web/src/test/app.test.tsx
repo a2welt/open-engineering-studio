@@ -17,11 +17,36 @@ function renderStudio() {
 }
 
 describe('Studio shell', () => {
-  it('Understand maps the layers and answers what breaks', async () => {
-    const user = userEvent.setup();
+  it('opens on the lifecycle with every stage, changes in flight and what needs you', async () => {
+    window.location.hash = '';
     renderStudio();
 
-    expect(await screen.findByRole('heading', { name: /your crew mapped open-model-fabric/i })).toBeVisible();
+    expect(await screen.findByRole('heading', { name: /agents write the code/i })).toBeVisible();
+    const stages = within(screen.getByRole('list', { name: 'Lifecycle of a change' })).getAllByRole('listitem');
+    expect(stages.map((s) => s.querySelector('.stage-title')?.textContent)).toEqual([
+      'Intent',
+      'Impact',
+      'Agent work',
+      'Verify',
+      'Review',
+      'Remember',
+    ]);
+    const changes = screen.getByRole('region', { name: 'Changes in flight' });
+    expect(within(changes).getByText('High risk')).toBeVisible();
+    expect(within(changes).getByText('Ready to merge')).toBeVisible();
+    expect(within(changes).getByText('Needs 1 signed approval')).toBeVisible();
+    const needs = screen.getByRole('complementary', { name: 'Needs you' });
+    expect(await within(needs).findByText('Approve')).toBeVisible();
+    expect(within(needs).getByText(/no agent receipts reference this change/i)).toBeVisible();
+    expect(screen.getByRole('navigation', { name: 'Connected tools' })).toHaveTextContent('Repo X-Ray');
+  });
+
+  it('Understand maps the layers and answers what breaks', async () => {
+    const user = userEvent.setup();
+    window.location.hash = '#/understand';
+    renderStudio();
+
+    expect(await screen.findByRole('heading', { name: /understand open-model-fabric/i })).toBeVisible();
     expect(screen.getByRole('heading', { name: 'Application core' })).toBeVisible();
     // The opening question is the routing service; its direct importers are listed.
     const direct = await screen.findByRole('region', { name: 'Depth 1' });

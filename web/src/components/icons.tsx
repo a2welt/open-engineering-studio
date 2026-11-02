@@ -111,3 +111,10 @@ export const ArrowUpIcon = (p: IconProps) => (
     <path d="M12 19V5M5 12l7-7 7 7" />
   </Icon>
 );
+
+export const CycleIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M20 12a8 8 0 0 1-13.7 5.7M4 12a8 8 0 0 1 13.7-5.7" />
+    <path d="M18 3v4h-4M6 21v-4h4" />
+  </Icon>
+);

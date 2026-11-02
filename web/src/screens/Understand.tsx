@@ -2,7 +2,7 @@ import { useId, useState, type FormEvent } from 'react';
 
 import type { ImpactReport, Layer } from '../api/xray/types';
 import { recallFor } from '../api/recall';
-import { Ballast, Guard, Sage, Scout } from '../components/crew';
+import { Sage, Scout } from '../components/crew';
 import { SparkIcon } from '../components/icons';
 import { type Route, type XrayState, repoName } from '../state';
 
@@ -11,13 +11,6 @@ const FLOW_NOTES: Record<string, string> = {
   presentation: 'calls application services',
   core: 'adapters implement ports; the core never imports adapters',
 };
-
-function greeting(now = new Date()): string {
-  const hour = now.getHours();
-  if (hour < 12) return 'Good morning';
-  if (hour < 18) return 'Good afternoon';
-  return 'Good evening';
-}
 
 function plural(count: number, word: string): string {
   return `${count} ${word}${count === 1 ? '' : 's'}`;
@@ -102,11 +95,10 @@ function ImpactAnswer({ impact }: { impact: ImpactReport }) {
 
 interface UnderstandProps {
   xray: XrayState;
-  pendingApprovals: number | null;
   onNavigate: (route: Route) => void;
 }
 
-export function Understand({ xray, pendingApprovals, onNavigate }: UnderstandProps) {
+export function Understand({ xray, onNavigate }: UnderstandProps) {
   const { layers, impact } = xray;
   const [question, setQuestion] = useState('');
   const [depth, setDepth] = useState('');
@@ -129,62 +121,26 @@ export function Understand({ xray, pendingApprovals, onNavigate }: UnderstandPro
 
   return (
     <>
-      <section aria-label="Your crew" className="hero rise">
-        <div className="hero-text">
-          <div className="eyebrow">{greeting()}</div>
-          <h2>Your crew mapped {repo}</h2>
-          <p>
+      <section className="page-head rise" aria-labelledby="understand-title">
+        <div>
+          <div className="eyebrow">Step 2 · Impact</div>
+          <h2 id="understand-title">Understand {repo}</h2>
+          <p className="muted">
             {layers
               ? `${plural(shown.length, 'layer')}, ${plural(
                   shown.reduce((n, l) => n + l.components.length, 0),
                   'component',
-                )} and ${plural(layers.violations.length, 'layer violation')}. Ask what breaks before you change a file.`
+                )} and ${plural(layers.violations.length, 'layer violation')}. Ask what breaks before an agent changes a file.`
               : 'Scout is reading the repository…'}
           </p>
         </div>
-        <ul className="crew">
-          <li>
-            <Scout className="float" />
-            <span className="name">Scout</span>
-            <span className="role">Repo X-Ray</span>
-            <span className="chip blue">{layers ? `Mapped ${plural(shown.length, 'layer')}` : 'Mapping…'}</span>
-          </li>
-          <li>
-            <Sage className="float d1" />
-            <span className="name">Sage</span>
-            <span className="role">Recall memory</span>
-            <span className="chip purple">{plural(decisions.length, 'decision')} here</span>
-          </li>
-          <li>
-            <Guard className="float d2" />
-            <span className="name">Guard</span>
-            <span className="role">OpenAgentTrust</span>
-            <span className="chip green">
-              {pendingApprovals === null
-                ? 'Checking…'
-                : pendingApprovals === 0
-                  ? 'Nothing waiting'
-                  : `${plural(pendingApprovals, 'approval')} waiting`}
-            </span>
-          </li>
-          <li>
-            <Ballast className="float d3" />
-            <span className="name">Ballast</span>
-            <span className="role">BallastOS</span>
-            <span className="chip amber">Not connected yet</span>
-          </li>
-        </ul>
+        {xray.source === 'sample' && (
+          <span className="chip amber" title={`Start it with: xray serve --root <repo>${xray.fallbackReason ? ` (${xray.fallbackReason})` : ''}`}>
+            Sample analysis · X-Ray offline
+          </span>
+        )}
       </section>
 
-      {xray.source === 'sample' && (
-        <div className="notice" role="status">
-          <span>
-            Showing a bundled sample analysis of Open-model-fabric because the X-Ray server did not answer
-            {xray.fallbackReason ? ` (${xray.fallbackReason})` : ''}. Start it with
-          </span>
-          <code>xray serve --root &lt;repo&gt;</code>
-        </div>
-      )}
       {xray.error && (
         <div className="notice error" role="alert">
           Repo X-Ray is unavailable: {xray.error}

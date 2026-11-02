@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from
 import {
   ArrowUpIcon,
   BrainIcon,
+  CycleIcon,
   BranchIcon,
   GaugeIcon,
   LayersIcon,
@@ -11,6 +12,8 @@ import {
   SparkIcon,
   SunIcon,
 } from './components/icons';
+import { ToolStrip } from './components/toolstrip';
+import { Lifecycle } from './screens/Lifecycle';
 import { Remember } from './screens/Remember';
 import { Trust } from './screens/Trust';
 import { Understand } from './screens/Understand';
@@ -19,6 +22,7 @@ import { DEFAULT_QUESTION, type Route, repoName, useRoute, useXray } from './sta
 import { useTheme } from './theme';
 
 const NAV: { route: Route; label: string; icon: ReactNode }[] = [
+  { route: 'lifecycle', label: 'Lifecycle', icon: <CycleIcon /> },
   { route: 'understand', label: 'Understand', icon: <LayersIcon /> },
   { route: 'trust', label: 'Trust', icon: <ShieldIcon /> },
   { route: 'remember', label: 'Remember', icon: <BrainIcon /> },
@@ -49,6 +53,7 @@ function BrandMark() {
 }
 
 const TITLES: Record<Route, string> = {
+  lifecycle: 'Lifecycle',
   understand: 'Understand',
   trust: 'Trust',
   remember: 'Remember',
@@ -145,6 +150,14 @@ export function App() {
         </div>
       </header>
 
+      <ToolStrip
+        xraySource={xray.source}
+        xrayFallback={xray.fallbackReason}
+        oatMode={oat.mode}
+        pending={pending}
+        onNavigate={navigate}
+      />
+
       <div className="body">
         <nav className="rail" aria-label="Studio">
           {NAV.map((item) => (
@@ -170,7 +183,8 @@ export function App() {
 
         <main id="main" tabIndex={-1}>
           <h1 className="visually-hidden">{TITLES[route]}</h1>
-          {route === 'understand' && <Understand xray={xray} pendingApprovals={pending} onNavigate={navigate} />}
+          {route === 'lifecycle' && <Lifecycle xray={xray} onNavigate={navigate} />}
+          {route === 'understand' && <Understand xray={xray} onNavigate={navigate} />}
           {route === 'trust' && (
             <Trust onPendingChange={setPending} affectedFilesFor={affectedFilesFor} onNavigate={navigate} />
           )}
