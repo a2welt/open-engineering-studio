@@ -118,17 +118,8 @@ export function Understand({ xray, onNavigate }: UnderstandProps) {
       )}
 
       <div className="row">
-        <section aria-labelledby="architecture-title" className="card grow rise r2">
-          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '8px 12px' }}>
-            <h2 id="architecture-title">Architecture</h2>
-            <span className="muted" style={{ fontSize: 14 }}>
-              {layers ? `${layers.layers.reduce((n, l) => n + l.files, 0)} files analysed` : 'Loading…'}
-            </span>
-            <span className="chips" style={{ marginLeft: 'auto' }}>
-              <span className="chip changed">Changed</span>
-              <span className="chip affected">Affected</span>
-            </span>
-          </div>
+        <section aria-labelledby="architecture-title" className="card grow rise r2 archcard">
+          {!layers && <h2 id="architecture-title">Architecture</h2>}
           {layers && <ArchitectureMap report={layers} layers={shown} impact={impact} reducedMotion={reducedMotion} />}
           {extra.length > 0 && (
             <p className="subtle" style={{ margin: 0 }}>
