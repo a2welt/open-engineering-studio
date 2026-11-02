@@ -1,0 +1,184 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/a2welt/open-engineering-studio/docs/schemas/studio.dossier.v0.schema.json",
+  "title": "Change dossier, studio.dossier/v0",
+  "description": "References to the evidence behind one change (docs/adr/0001-change-dossier-and-risk-tiered-review.md). Numbers are integers only, so the canonical JSON (sorted keys, no whitespace, UTF-8) hashes the same everywhere; digest covers every member except itself.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "type",
+    "change",
+    "intent",
+    "impact",
+    "actions",
+    "model_calls",
+    "verification",
+    "risk",
+    "approvals",
+    "gaps",
+    "digest"
+  ],
+  "properties": {
+    "type": { "const": "studio.dossier/v0" },
+    "change": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "path", "base", "head", "pull_request", "author"],
+      "properties": {
+        "repository": {
+          "description": "Repository URL without credentials, or null without an origin remote.",
+          "type": ["string", "null"]
+        },
+        "path": {
+          "description": "Analysed directory inside the repository, null for the top level.",
+          "type": ["string", "null"]
+        },
+        "base": { "$ref": "#/$defs/commit" },
+        "head": { "$ref": "#/$defs/commit" },
+        "pull_request": {
+          "oneOf": [
+            { "type": "string", "pattern": "^github:pr:[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+#[1-9][0-9]*$" },
+            { "type": "null" }
+          ]
+        },
+        "author": {
+          "description": "Author name of the head commit.",
+          "type": ["string", "null"]
+        }
+      }
+    },
+    "intent": {
+      "description": "Recall decisions the change implements or must respect.",
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^recall:memory:[A-Za-z0-9][A-Za-z0-9._-]*$" }
+    },
+    "impact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["xray_digest", "changed", "dependents", "layers", "components"],
+      "properties": {
+        "xray_digest": {
+          "description": "Digest of the Repo X-Ray change impact (xray impact --base --head).",
+          "$ref": "#/$defs/digest"
+        },
+        "changed": { "$ref": "#/$defs/sortedStrings" },
+        "dependents": { "type": "integer", "minimum": 0 },
+        "layers": { "$ref": "#/$defs/sortedStrings" },
+        "components": { "$ref": "#/$defs/sortedStrings" }
+      }
+    },
+    "actions": {
+      "description": "AgentProof receipts of the agent actions behind the change.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["ref", "action", "resource", "status", "verified"],
+        "properties": {
+          "ref": { "$ref": "#/$defs/agentproof" },
+          "action": { "type": ["string", "null"] },
+          "resource": { "type": ["string", "null"] },
+          "status": { "type": ["string", "null"] },
+          "verified": { "type": "boolean" }
+        }
+      }
+    },
+    "model_calls": {
+      "description": "Gateway request ids, models, tokens and cost. Never prompts or output.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["ref"],
+        "properties": {
+          "ref": { "type": "string", "pattern": "^(omf|ballast):request:.+$" },
+          "model": { "type": "string" },
+          "input_tokens": { "type": "integer", "minimum": 0 },
+          "output_tokens": { "type": "integer", "minimum": 0 },
+          "cost_usd_micros": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ci", "receipts", "receipts_verified", "tests_changed_by_agent"],
+      "properties": {
+        "ci": { "enum": ["passed", "failed", "pending", null] },
+        "receipts": { "type": "integer", "minimum": 0 },
+        "receipts_verified": { "type": "integer", "minimum": 0 },
+        "tests_changed_by_agent": {
+          "description": "Changed test files that a receipt shows an agent writing to.",
+          "$ref": "#/$defs/sortedStrings"
+        }
+      }
+    },
+    "risk": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["tier", "rule"],
+          "properties": {
+            "tier": { "enum": ["low", "medium", "high", "critical"] },
+            "rule": { "type": "string" }
+          }
+        },
+        { "type": "null" }
+      ]
+    },
+    "approvals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["ref", "receipt", "approver", "decision"],
+        "properties": {
+          "ref": { "$ref": "#/$defs/agentproof" },
+          "receipt": { "$ref": "#/$defs/agentproof" },
+          "approver": { "type": ["string", "null"] },
+          "decision": { "enum": ["approved", "rejected", null] }
+        }
+      }
+    },
+    "gaps": {
+      "description": "Missing evidence, sorted by code then subject.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["code", "subject", "detail"],
+        "properties": {
+          "code": {
+            "enum": [
+              "no-pull-request",
+              "oat-not-configured",
+              "oat-unavailable",
+              "no-receipts",
+              "unverified-receipt",
+              "receipt-digest-mismatch",
+              "recall-not-configured",
+              "recall-unavailable",
+              "no-repository-url",
+              "no-linked-decision",
+              "model-calls-unknown",
+              "risk-not-assessed"
+            ]
+          },
+          "subject": { "type": ["string", "null"] },
+          "detail": { "type": "string" }
+        }
+      }
+    },
+    "digest": {
+      "description": "sha256 over the canonical JSON of the dossier without this member.",
+      "$ref": "#/$defs/digest"
+    }
+  },
+  "$defs": {
+    "commit": { "type": "string", "pattern": "^[0-9a-f]{40}([0-9a-f]{24})?$" },
+    "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "agentproof": { "type": "string", "pattern": "^agentproof:sha256:[0-9a-f]{64}$" },
+    "sortedStrings": { "type": "array", "uniqueItems": true, "items": { "type": "string" } }
+  }
+}
