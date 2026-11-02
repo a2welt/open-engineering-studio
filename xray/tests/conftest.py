@@ -1,11 +1,62 @@
 from __future__ import annotations
 
+import os
+import shutil
+import subprocess
 from collections.abc import Callable
 from pathlib import Path
 
 import pytest
 
 Tree = Callable[[dict[str, str]], Path]
+
+
+def git(root: Path, *args: str) -> str:
+    """Run git in ``root`` with a fixed identity and dates, ignoring user and system config."""
+    env = {
+        **os.environ,
+        "GIT_CONFIG_NOSYSTEM": "1",
+        "GIT_CONFIG_GLOBAL": os.devnull,
+        "GIT_AUTHOR_NAME": "Test",
+        "GIT_AUTHOR_EMAIL": "test@example.invalid",
+        "GIT_COMMITTER_NAME": "Test",
+        "GIT_COMMITTER_EMAIL": "test@example.invalid",
+        "GIT_AUTHOR_DATE": "2026-01-01T00:00:00Z",
+        "GIT_COMMITTER_DATE": "2026-01-01T00:00:00Z",
+    }
+    git_bin = shutil.which("git")
+    assert git_bin is not None
+    done = subprocess.run(
+        [git_bin, "-C", str(root), *args], capture_output=True, text=True, env=env, check=True
+    )
+    return done.stdout.strip()
+
+
+def write_files(root: Path, files: dict[str, str | None]) -> None:
+    """Write (or, for ``None``, delete) files under ``root``."""
+    for rel, content in files.items():
+        path = root / rel
+        if content is None:
+            path.unlink()
+            continue
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(content, encoding="utf-8")
+
+
+def commit_all(root: Path, message: str) -> str:
+    git(root, "add", "-A")
+    git(root, "commit", "-q", "-m", message)
+    return git(root, "rev-parse", "HEAD")
+
+
+@pytest.fixture
+def git_repo(tmp_path: Path) -> Path:
+    """An empty git repository whose ``origin`` is an https GitHub URL."""
+    root = tmp_path / "gitrepo"
+    root.mkdir()
+    git(root, "init", "-q", "-b", "main")
+    git(root, "remote", "add", "origin", "https://github.com/acme/shop.git")
+    return root
 
 
 @pytest.fixture

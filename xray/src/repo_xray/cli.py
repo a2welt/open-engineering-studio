@@ -10,6 +10,7 @@ from typing import Any
 
 from . import __version__
 from .analysis import TargetError, analyze
+from .change import ChangeError, change_impact
 from .config import ConfigError, load_config
 from .server import LOOPBACK_HOSTS, make_server
 
@@ -40,8 +41,14 @@ def build_parser() -> argparse.ArgumentParser:
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("graph", parents=[common], help="files and import edges")
     sub.add_parser("layers", parents=[common], help="layers, components and violations")
-    impact = sub.add_parser("impact", parents=[common], help="what breaks if PATH changes")
-    impact.add_argument("path", help="file or directory, relative to the root, or a unique suffix")
+    impact = sub.add_parser(
+        "impact", parents=[common], help="what breaks if PATH changes, or a change BASE..HEAD"
+    )
+    impact.add_argument(
+        "path", nargs="?", help="file or directory, relative to the root, or a unique suffix"
+    )
+    impact.add_argument("--base", help="base commit of a change (with --head)")
+    impact.add_argument("--head", help="head commit of a change (with --base)")
     impact.add_argument("--max-depth", type=_positive, default=None, help="stop after N hops")
 
     serve = sub.add_parser("serve", parents=[common], help="serve the analysis over HTTP")
@@ -56,7 +63,14 @@ def _emit(data: dict[str, Any], compact: bool) -> None:
 
 
 def main(argv: list[str] | None = None) -> int:
-    args = build_parser().parse_args(argv)
+    parser = build_parser()
+    args = parser.parse_args(argv)
+    if args.command == "impact":
+        commits = (args.base is not None, args.head is not None)
+        if any(commits) and not all(commits):
+            parser.error("--base and --head go together")
+        if all(commits) == (args.path is not None):
+            parser.error("give either PATH or --base and --head")
     root: Path = args.root.resolve()
     try:
         config = load_config(root, args.config)
@@ -76,6 +90,13 @@ def main(argv: list[str] | None = None) -> int:
                 server.server_close()
             return 0
 
+        if args.command == "impact" and args.base is not None:
+            _emit(
+                change_impact(root, args.base, args.head, args.config, args.max_depth),
+                args.compact,
+            )
+            return 0
+
         analysis = analyze(root, config)
         if args.command == "graph":
             _emit(analysis.graph(), args.compact)
@@ -84,7 +105,7 @@ def main(argv: list[str] | None = None) -> int:
         else:
             _emit(analysis.impact(args.path, args.max_depth), args.compact)
         return 0
-    except (ConfigError, TargetError, NotADirectoryError) as exc:
+    except (ConfigError, TargetError, ChangeError, NotADirectoryError) as exc:
         print(f"xray: {exc}", file=sys.stderr)
         return 2
 
