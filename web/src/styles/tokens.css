@@ -1,0 +1,89 @@
+/* Design tokens from the Studio design reference. Light is the default; dark applies when the
+   user picks it, or follows the system when no choice is stored. Text pairs meet WCAG AA
+   (checked in src/test/contrast.test.ts). */
+
+:root {
+  color-scheme: light;
+  --bg: #f8fafd;
+  --surface: #ffffff;
+  --surface2: #f0f4f9;
+  --search: #e9eef6;
+  --text: #1f1f1f;
+  --text2: #444746;
+  --text3: #5f6368;
+  --outline: #747775;
+  --divider: #e3e3e3;
+  --primary: #0b57d0;
+  --on-primary: #ffffff;
+  --pc: #d3e3fd;
+  --on-pc: #041e49;
+  --green: #146c2e;
+  --on-green: #ffffff;
+  --gc: #c4eed0;
+  --on-gc: #072711;
+  --amber-c: #ffe7a3;
+  --on-amber: #3e2700;
+  --amber-text: #5c4300;
+  --amber-soft: #fff0c2;
+  --red: #b3261e;
+  --red-c: #f9dedc;
+  --on-red: #410e0b;
+  --chg: #ffdad3;
+  --on-chg: #5f1408;
+  --chg-border: #c5221f;
+  --purple-c: #eaddff;
+  --on-purple: #21005d;
+  --purple-text: #4a2a7f;
+  --purple-soft: #f3edf7;
+  --hero1: #e8f0fe;
+  --hero2: #f3e8fd;
+  --hero3: #e6f4ea;
+  --crew: rgba(255, 255, 255, 0.75);
+  --shadow: 0 1px 2px rgba(60, 64, 67, 0.12), 0 1px 3px 1px rgba(60, 64, 67, 0.08);
+  --badge: #b3261e;
+  --on-badge: #ffffff;
+  --focus: #0b57d0;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #131314;
+  --surface: #1e1f20;
+  --surface2: #282a2c;
+  --search: #282a2c;
+  --text: #e3e3e3;
+  --text2: #c4c7c5;
+  --text3: #abafb3;
+  --outline: #8e918f;
+  --divider: #3c4043;
+  --primary: #a8c7fa;
+  --on-primary: #062e6f;
+  --pc: #0842a0;
+  --on-pc: #d3e3fd;
+  --green: #6dd58c;
+  --on-green: #0a3818;
+  --gc: #0f5223;
+  --on-gc: #c4eed0;
+  --amber-c: #5c4300;
+  --on-amber: #ffdf99;
+  --amber-text: #ffd970;
+  --amber-soft: #3d2e00;
+  --red: #f2b8b5;
+  --red-c: #8c1d18;
+  --on-red: #f9dedc;
+  --chg: #601410;
+  --on-chg: #ffdad3;
+  --chg-border: #f28b82;
+  --purple-c: #4f378b;
+  --on-purple: #eaddff;
+  --purple-text: #d0bcff;
+  --purple-soft: #2b2433;
+  --hero1: #1b2a45;
+  --hero2: #2b1f3d;
+  --hero3: #16301f;
+  --crew: rgba(30, 31, 32, 0.72);
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  --badge: #f2b8b5;
+  --on-badge: #601410;
+  --focus: #a8c7fa;
+}

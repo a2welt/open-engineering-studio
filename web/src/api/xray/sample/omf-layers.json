@@ -1,0 +1,404 @@
+{
+ "schema": "xray/v0",
+ "root": "Open-model-fabric",
+ "repository": {
+  "url": "https://github.com/findajay/Open-model-fabric",
+  "commit": "b5680964319da1ec4a7963ab7e65ebd01d1aaec5",
+  "path": null
+ },
+ "layers": [
+  {
+   "name": "presentation",
+   "label": "Presentation",
+   "files": 60,
+   "components": [
+    {
+     "id": "apps/web",
+     "name": "apps/web",
+     "layer": "presentation",
+     "files": 34,
+     "languages": {
+      "typescript": 34
+     }
+    },
+    {
+     "id": "apps/api",
+     "name": "apps/api",
+     "layer": "presentation",
+     "files": 22,
+     "languages": {
+      "python": 22
+     }
+    },
+    {
+     "id": "packages/sdk-typescript",
+     "name": "packages/sdk-typescript",
+     "layer": "presentation",
+     "files": 4,
+     "languages": {
+      "typescript": 4
+     }
+    }
+   ]
+  },
+  {
+   "name": "core",
+   "label": "Application core",
+   "files": 29,
+   "components": [
+    {
+     "id": "python/omf/core/services",
+     "name": "core/services",
+     "layer": "core",
+     "files": 12,
+     "languages": {
+      "python": 12
+     }
+    },
+    {
+     "id": "python/omf/core/ports",
+     "name": "core/ports",
+     "layer": "core",
+     "files": 8,
+     "languages": {
+      "python": 8
+     }
+    },
+    {
+     "id": "python/omf/core/domain",
+     "name": "core/domain",
+     "layer": "core",
+     "files": 6,
+     "languages": {
+      "python": 6
+     }
+    },
+    {
+     "id": "python/omf/core/security",
+     "name": "core/security",
+     "layer": "core",
+     "files": 2,
+     "languages": {
+      "python": 2
+     }
+    },
+    {
+     "id": "python/omf/core",
+     "name": "core",
+     "layer": "core",
+     "files": 1,
+     "languages": {
+      "python": 1
+     }
+    }
+   ]
+  },
+  {
+   "name": "adapters",
+   "label": "Adapters",
+   "files": 39,
+   "components": [
+    {
+     "id": "python/omf/adapters/compute",
+     "name": "adapters/compute",
+     "layer": "adapters",
+     "files": 14,
+     "languages": {
+      "python": 14
+     }
+    },
+    {
+     "id": "python/omf/adapters/metadata",
+     "name": "adapters/metadata",
+     "layer": "adapters",
+     "files": 7,
+     "languages": {
+      "python": 7
+     }
+    },
+    {
+     "id": "python/omf/adapters/storage",
+     "name": "adapters/storage",
+     "layer": "adapters",
+     "files": 6,
+     "languages": {
+      "python": 6
+     }
+    },
+    {
+     "id": "python/omf/adapters/inference",
+     "name": "adapters/inference",
+     "layer": "adapters",
+     "files": 5,
+     "languages": {
+      "python": 5
+     }
+    },
+    {
+     "id": "python/omf/adapters/telemetry",
+     "name": "adapters/telemetry",
+     "layer": "adapters",
+     "files": 3,
+     "languages": {
+      "python": 3
+     }
+    },
+    {
+     "id": "python/omf/adapters",
+     "name": "adapters",
+     "layer": "adapters",
+     "files": 2,
+     "languages": {
+      "python": 2
+     }
+    },
+    {
+     "id": "python/omf/adapters/secrets",
+     "name": "adapters/secrets",
+     "layer": "adapters",
+     "files": 2,
+     "languages": {
+      "python": 2
+     }
+    }
+   ]
+  },
+  {
+   "name": "composition",
+   "label": "Composition root",
+   "files": 5,
+   "components": [
+    {
+     "id": "python/omf/bootstrap",
+     "name": "bootstrap",
+     "layer": "composition",
+     "files": 5,
+     "languages": {
+      "python": 5
+     }
+    }
+   ]
+  },
+  {
+   "name": "tests",
+   "label": "Tests",
+   "files": 43,
+   "components": [
+    {
+     "id": "tests",
+     "name": "tests",
+     "layer": "tests",
+     "files": 35,
+     "languages": {
+      "python": 35
+     }
+    },
+    {
+     "id": "apps/web/e2e",
+     "name": "e2e",
+     "layer": "tests",
+     "files": 2,
+     "languages": {
+      "typescript": 2
+     }
+    },
+    {
+     "id": "apps/web/src/pages",
+     "name": "pages",
+     "layer": "tests",
+     "files": 2,
+     "languages": {
+      "typescript": 2
+     }
+    },
+    {
+     "id": "apps/web/src/components",
+     "name": "components",
+     "layer": "tests",
+     "files": 1,
+     "languages": {
+      "typescript": 1
+     }
+    },
+    {
+     "id": "apps/web/src/features/playground",
+     "name": "playground",
+     "layer": "tests",
+     "files": 1,
+     "languages": {
+      "typescript": 1
+     }
+    },
+    {
+     "id": "apps/web/src/test",
+     "name": "test",
+     "layer": "tests",
+     "files": 1,
+     "languages": {
+      "typescript": 1
+     }
+    },
+    {
+     "id": "packages/sdk-typescript/src",
+     "name": "src",
+     "layer": "tests",
+     "files": 1,
+     "languages": {
+      "typescript": 1
+     }
+    }
+   ]
+  },
+  {
+   "name": "other",
+   "label": "Other",
+   "files": 5,
+   "components": [
+    {
+     "id": "scripts",
+     "name": "scripts",
+     "layer": "other",
+     "files": 2,
+     "languages": {
+      "python": 2
+     }
+    },
+    {
+     "id": "examples/react-chat",
+     "name": "react-chat",
+     "layer": "other",
+     "files": 1,
+     "languages": {
+      "typescript": 1
+     }
+    },
+    {
+     "id": "examples/react-chat/src",
+     "name": "src",
+     "layer": "other",
+     "files": 1,
+     "languages": {
+      "typescript": 1
+     }
+    },
+    {
+     "id": "python/omf",
+     "name": "omf",
+     "layer": "other",
+     "files": 1,
+     "languages": {
+      "python": 1
+     }
+    }
+   ]
+  }
+ ],
+ "dependencies": [
+  {
+   "from": "adapters",
+   "to": "core",
+   "imports": 91
+  },
+  {
+   "from": "composition",
+   "to": "adapters",
+   "imports": 23
+  },
+  {
+   "from": "composition",
+   "to": "core",
+   "imports": 28
+  },
+  {
+   "from": "other",
+   "to": "adapters",
+   "imports": 1
+  },
+  {
+   "from": "other",
+   "to": "composition",
+   "imports": 1
+  },
+  {
+   "from": "other",
+   "to": "core",
+   "imports": 2
+  },
+  {
+   "from": "other",
+   "to": "presentation",
+   "imports": 2
+  },
+  {
+   "from": "other",
+   "to": "tests",
+   "imports": 3
+  },
+  {
+   "from": "presentation",
+   "to": "composition",
+   "imports": 10
+  },
+  {
+   "from": "presentation",
+   "to": "core",
+   "imports": 35
+  },
+  {
+   "from": "presentation",
+   "to": "other",
+   "imports": 2
+  },
+  {
+   "from": "tests",
+   "to": "adapters",
+   "imports": 30
+  },
+  {
+   "from": "tests",
+   "to": "composition",
+   "imports": 15
+  },
+  {
+   "from": "tests",
+   "to": "core",
+   "imports": 53
+  },
+  {
+   "from": "tests",
+   "to": "presentation",
+   "imports": 17
+  }
+ ],
+ "rules": {
+  "adapters": [
+   "adapters",
+   "core"
+  ],
+  "composition": [
+   "adapters",
+   "composition",
+   "core",
+   "other",
+   "presentation",
+   "tests"
+  ],
+  "core": [
+   "core"
+  ],
+  "presentation": [
+   "composition",
+   "core",
+   "presentation"
+  ],
+  "tests": [
+   "adapters",
+   "composition",
+   "core",
+   "other",
+   "presentation",
+   "tests"
+  ]
+ },
+ "violations": []
+}

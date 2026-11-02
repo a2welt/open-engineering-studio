@@ -1,0 +1,79 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  xray:
+    name: Repo X-Ray, Python ${{ matrix.python }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        python: ["3.11", "3.13"]
+        include:
+          - os: windows-latest
+            python: "3.13"
+          - os: macos-latest
+            python: "3.13"
+    defaults:
+      run:
+        working-directory: xray
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10.3.2
+        with:
+          version: "0.11.32"
+      - run: uv sync --frozen --python ${{ matrix.python }}
+      - run: uv run ruff check src tests
+      - run: uv run ruff format --check src tests
+      - run: uv run mypy
+      - run: uv run pytest -q
+      - name: CLI analyses this repository
+        run: uv run xray impact xray/src/repo_xray/config.py --root .. --max-depth 2
+
+  web:
+    name: Studio web app
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+
+  package:
+    name: X-Ray wheel builds and installs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10.3.2
+        with:
+          version: "0.11.32"
+      - run: uv build xray
+      - name: Install the wheel in a clean environment and run the CLI
+        run: |
+          python -m venv /tmp/venv
+          /tmp/venv/bin/pip install xray/dist/*.whl
+          /tmp/venv/bin/xray --version
+          /tmp/venv/bin/xray layers --root . --compact > /dev/null
