@@ -1,6 +1,6 @@
 # ADR 0001: Change dossiers and risk-tiered review
 
-- Status: proposed
+- Status: accepted
 - Date: 2026-11-02
 
 ## Context
