@@ -32,6 +32,8 @@ jobs:
         working-directory: xray
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 2
       - uses: astral-sh/setup-uv@v10.3.2
         with:
           version: "0.11.32"
@@ -42,6 +44,39 @@ jobs:
       - run: uv run pytest -q
       - name: CLI analyses this repository
         run: uv run xray impact xray/src/repo_xray/config.py --root .. --max-depth 2
+      - name: CLI analyses the last commit of this repository
+        run: uv run xray impact --base HEAD~1 --head HEAD --root .. --compact
+
+  dossier:
+    name: Change dossier, Python ${{ matrix.python }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        python: ["3.11", "3.13"]
+        include:
+          - os: windows-latest
+            python: "3.13"
+    defaults:
+      run:
+        working-directory: dossier
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 2
+      - uses: astral-sh/setup-uv@v10.3.2
+        with:
+          version: "0.11.32"
+      - run: uv sync --frozen --python ${{ matrix.python }}
+      - run: uv run ruff check src tests
+      - run: uv run ruff format --check src tests
+      - run: uv run mypy
+      - run: uv run pytest -q
+      - name: Build and verify the dossier of the last commit of this repository
+        run: |
+          uv run studio dossier build --repo .. --base HEAD~1 --head HEAD --out dossier.json
+          uv run studio dossier verify dossier.json
 
   web:
     name: Studio web app

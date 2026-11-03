@@ -1,0 +1,62 @@
+[project]
+name = "studio-dossier"
+version = "0.1.0"
+description = "Change dossiers (studio.dossier/v0): one change's evidence from Repo X-Ray, OpenAgentTrust and Recall."
+readme = "README.md"
+license = "Apache-2.0"
+requires-python = ">=3.11"
+authors = [{ name = "Open Engineering Studio contributors" }]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "License :: OSI Approved :: Apache Software License",
+  "Programming Language :: Python :: 3",
+  "Topic :: Software Development :: Quality Assurance",
+]
+# Standard library plus Repo X-Ray (which has no dependencies of its own).
+dependencies = ["repo-xray"]
+
+[dependency-groups]
+dev = [
+  "jsonschema==4.26.0",
+  "pytest==9.1.1",
+  "ruff==0.17.1",
+  "mypy==2.4.0",
+]
+
+[project.scripts]
+studio = "studio_dossier.cli:main"
+
+[tool.uv.sources]
+repo-xray = { path = "../xray" }
+
+[build-system]
+requires = ["hatchling==1.32.4"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/studio_dossier"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+filterwarnings = ["error"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "S", "RUF", "SIM", "PT"]
+ignore = [
+  "S101", # assert is fine in tests
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S", "PT011"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+mypy_path = ["src"]
+packages = ["studio_dossier"]
+warn_unused_ignores = true

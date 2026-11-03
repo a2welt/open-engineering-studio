@@ -17,9 +17,10 @@ Tools link to each other with the shared reference URIs defined in OpenAgentTrus
 `git+<repo>@<commit>#<path>`).
 
 ```
-xray/   Repo X-Ray: Python package, CLI and HTTP endpoint (standard library only)
-web/    Studio shell: React + Vite + TypeScript
-docs/   Integration contracts and decisions (docs/adr)
+xray/     Repo X-Ray: Python package, CLI and HTTP endpoint (standard library only)
+dossier/  Change dossiers: `studio dossier build` (standard library plus Repo X-Ray)
+web/      Studio shell: React + Vite + TypeScript
+docs/     Integration contracts and decisions (docs/adr)
 ```
 
 ## Run Repo X-Ray
@@ -36,6 +37,26 @@ uv run xray serve --root ../../Open-model-fabric      # http://127.0.0.1:8765
 
 See [xray/README.md](xray/README.md) for every command, the JSON it prints, import resolution
 and the `xray.toml` layer overrides.
+
+## Build a change dossier
+
+A change dossier (`studio.dossier/v0`, [ADR 0001](docs/adr/0001-change-dossier-and-risk-tiered-review.md),
+[schema](docs/schemas/studio.dossier.v0.schema.json)) collects one change's evidence as
+references: what it affects (Repo X-Ray, commit to commit), which agent actions are behind it
+and whether their receipts verify (OpenAgentTrust), which decisions it implements (Recall), and
+what is missing (`gaps`). Its `digest` covers the canonical JSON, so two builds can be compared.
+
+```bash
+cd dossier
+uv sync
+OAT_API_TOKEN=… RECALL_API_TOKEN=… uv run studio dossier build --repo ../../Open-model-fabric   --base main --head my-branch --pr github:pr:findajay/Open-model-fabric#42   --oat-url http://127.0.0.1:8787 --recall-url http://127.0.0.1:4321 --out dossier.json
+uv run studio dossier verify dossier.json
+```
+
+Receipts are found through the PR reference, which `oat mcp-proxy --reference` adds to every
+agent request. Without `--pr`, `--oat-url` or `--recall-url` the dossier is still built, with
+the missing evidence listed in `gaps`. Model calls and the risk tier are not filled yet (ADR
+0001 steps 4 to 6). See [dossier/README.md](dossier/README.md).
 
 ## Run the Studio
 
