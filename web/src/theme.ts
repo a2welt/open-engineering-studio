@@ -47,3 +47,18 @@ export function useTheme(): [Theme, () => void] {
 
   return [theme, toggle];
 }
+
+/** True when the system asks for reduced motion; the map then skips moving parts. */
+export function useReducedMotion(): boolean {
+  const [reduced, setReduced] = useState(
+    () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false,
+  );
+  useEffect(() => {
+    const query = window.matchMedia?.('(prefers-reduced-motion: reduce)');
+    if (!query) return;
+    const update = () => setReduced(query.matches);
+    query.addEventListener('change', update);
+    return () => query.removeEventListener('change', update);
+  }, []);
+  return reduced;
+}

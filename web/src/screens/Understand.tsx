@@ -1,58 +1,17 @@
 import { useId, useState, type FormEvent } from 'react';
 
-import type { ImpactReport, Layer } from '../api/xray/types';
+import type { ImpactReport } from '../api/xray/types';
 import { recallFor } from '../api/recall';
-import { Ballast, Guard, Sage, Scout } from '../components/crew';
+import { ArchitectureMap } from '../components/ArchitectureMap';
+import { Sage, Scout } from '../components/crew';
 import { SparkIcon } from '../components/icons';
 import { type Route, type XrayState, repoName } from '../state';
+import { useReducedMotion } from '../theme';
 
 const ARCHITECTURE_LAYERS = ['presentation', 'core', 'adapters', 'composition'];
-const FLOW_NOTES: Record<string, string> = {
-  presentation: 'calls application services',
-  core: 'adapters implement ports; the core never imports adapters',
-};
-
-function greeting(now = new Date()): string {
-  const hour = now.getHours();
-  if (hour < 12) return 'Good morning';
-  if (hour < 18) return 'Good afternoon';
-  return 'Good evening';
-}
 
 function plural(count: number, word: string): string {
   return `${count} ${word}${count === 1 ? '' : 's'}`;
-}
-
-function LayerBlock({ layer, impact }: { layer: Layer; impact: ImpactReport | null }) {
-  const changed = new Set(impact ? [impact.target.component] : []);
-  const affected = new Map((impact?.summary.components ?? []).map((c) => [c.id, c.files]));
-  return (
-    <>
-      <h3 className="layer-title" id={`layer-${layer.name}`}>
-        {layer.label}
-      </h3>
-      <ul className="components" aria-labelledby={`layer-${layer.name}`}>
-        {layer.components.map((component) => {
-          const isChanged = changed.has(component.id);
-          const affectedFiles = affected.get(component.id);
-          const state = isChanged ? 'changed' : affectedFiles ? 'affected' : '';
-          const targetFile = impact?.target.path?.split('/').pop();
-          return (
-            <li key={component.id} className={`component ${state}`} title={component.id}>
-              <div className="title">{component.name.split('/').pop()}</div>
-              <div className="meta">
-                {isChanged && targetFile
-                  ? `${targetFile} · changed`
-                  : affectedFiles
-                    ? `${plural(affectedFiles, 'file')} affected`
-                    : plural(component.files, 'file')}
-              </div>
-            </li>
-          );
-        })}
-      </ul>
-    </>
-  );
 }
 
 function ImpactAnswer({ impact }: { impact: ImpactReport }) {
@@ -102,15 +61,15 @@ function ImpactAnswer({ impact }: { impact: ImpactReport }) {
 
 interface UnderstandProps {
   xray: XrayState;
-  pendingApprovals: number | null;
   onNavigate: (route: Route) => void;
 }
 
-export function Understand({ xray, pendingApprovals, onNavigate }: UnderstandProps) {
+export function Understand({ xray, onNavigate }: UnderstandProps) {
   const { layers, impact } = xray;
   const [question, setQuestion] = useState('');
   const [depth, setDepth] = useState('');
   const inputId = useId();
+  const reducedMotion = useReducedMotion();
   const listId = useId();
   const repo = repoName(layers?.root);
   const shown = layers?.layers.filter((l) => ARCHITECTURE_LAYERS.includes(l.name)) ?? [];
@@ -129,62 +88,29 @@ export function Understand({ xray, pendingApprovals, onNavigate }: UnderstandPro
 
   return (
     <>
-      <section aria-label="Your crew" className="hero rise">
-        <div className="hero-text">
-          <div className="eyebrow">{greeting()}</div>
-          <h2>Your crew mapped {repo}</h2>
-          <p>
+      <section className="page-head rise" aria-labelledby="understand-title">
+        <div>
+          <div className="eyebrow">Step 2 · Impact</div>
+          <h2 id="understand-title">
+            Understand {repo}
+            {layers?.repository?.commit && <span className="mono subtle"> · {layers.repository.commit.slice(0, 7)}</span>}
+          </h2>
+          <p className="muted">
             {layers
               ? `${plural(shown.length, 'layer')}, ${plural(
                   shown.reduce((n, l) => n + l.components.length, 0),
                   'component',
-                )} and ${plural(layers.violations.length, 'layer violation')}. Ask what breaks before you change a file.`
+                )} and ${plural(layers.violations.length, 'layer violation')}. Ask what breaks before an agent changes a file.`
               : 'Scout is reading the repository…'}
           </p>
         </div>
-        <ul className="crew">
-          <li>
-            <Scout className="float" />
-            <span className="name">Scout</span>
-            <span className="role">Repo X-Ray</span>
-            <span className="chip blue">{layers ? `Mapped ${plural(shown.length, 'layer')}` : 'Mapping…'}</span>
-          </li>
-          <li>
-            <Sage className="float d1" />
-            <span className="name">Sage</span>
-            <span className="role">Recall memory</span>
-            <span className="chip purple">{plural(decisions.length, 'decision')} here</span>
-          </li>
-          <li>
-            <Guard className="float d2" />
-            <span className="name">Guard</span>
-            <span className="role">OpenAgentTrust</span>
-            <span className="chip green">
-              {pendingApprovals === null
-                ? 'Checking…'
-                : pendingApprovals === 0
-                  ? 'Nothing waiting'
-                  : `${plural(pendingApprovals, 'approval')} waiting`}
-            </span>
-          </li>
-          <li>
-            <Ballast className="float d3" />
-            <span className="name">Ballast</span>
-            <span className="role">BallastOS</span>
-            <span className="chip amber">Not connected yet</span>
-          </li>
-        </ul>
+        {xray.source === 'sample' && (
+          <span className="chip amber" title={`Start it with: xray serve --root <repo>${xray.fallbackReason ? ` (${xray.fallbackReason})` : ''}`}>
+            Sample analysis · X-Ray offline
+          </span>
+        )}
       </section>
 
-      {xray.source === 'sample' && (
-        <div className="notice" role="status">
-          <span>
-            Showing a bundled sample analysis of Open-model-fabric because the X-Ray server did not answer
-            {xray.fallbackReason ? ` (${xray.fallbackReason})` : ''}. Start it with
-          </span>
-          <code>xray serve --root &lt;repo&gt;</code>
-        </div>
-      )}
       {xray.error && (
         <div className="notice error" role="alert">
           Repo X-Ray is unavailable: {xray.error}
@@ -192,28 +118,9 @@ export function Understand({ xray, pendingApprovals, onNavigate }: UnderstandPro
       )}
 
       <div className="row">
-        <section aria-labelledby="architecture-title" className="card grow rise r2">
-          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '8px 12px' }}>
-            <h2 id="architecture-title">Architecture</h2>
-            <span className="muted" style={{ fontSize: 14 }}>
-              {layers ? `${layers.layers.reduce((n, l) => n + l.files, 0)} files analysed` : 'Loading…'}
-            </span>
-            <span className="chips" style={{ marginLeft: 'auto' }}>
-              <span className="chip changed">Changed</span>
-              <span className="chip affected">Affected</span>
-            </span>
-          </div>
-          {shown.map((layer, index) => (
-            <div key={layer.name}>
-              <LayerBlock layer={layer} impact={impact} />
-              {index < shown.length - 1 && FLOW_NOTES[layer.name] && (
-                <div className="flow-note" style={{ marginTop: 10 }}>
-                  <span className="flow-line" aria-hidden="true" />
-                  {FLOW_NOTES[layer.name]}
-                </div>
-              )}
-            </div>
-          ))}
+        <section aria-labelledby="architecture-title" className="card grow rise r2 archcard">
+          {!layers && <h2 id="architecture-title">Architecture</h2>}
+          {layers && <ArchitectureMap report={layers} layers={shown} impact={impact} reducedMotion={reducedMotion} />}
           {extra.length > 0 && (
             <p className="subtle" style={{ margin: 0 }}>
               Also analysed: {extra.map((l) => `${plural(l.files, 'file')} in ${l.label.toLowerCase()}`).join(', ')}.
